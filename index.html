@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<meta name="description" content="Bible Journey 2026 - Acompanhamento do plano de leitura bíblica.">
+<link rel="manifest" href="manifest.json">
+<title>Bible Journey 2026</title>
+<style>
+:root{--bg:#121212;--card:#1e1e1e;--accent:#bb86fc;--text:#e0e0e0;--completed:#03dac6;--muted:#aaa}
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);padding:16px;margin:0;max-width:760px;margin-inline:auto;padding-bottom:32px}
+h1{text-align:center;color:var(--accent);font-size:1.5rem;margin:8px 0 4px}
+.subtitle{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:16px}
+.progress-container{background:var(--card);padding:16px;border-radius:14px;margin-bottom:20px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.25);position:sticky;top:8px;z-index:5}
+.progress-bar{background:#333;border-radius:8px;height:12px;overflow:hidden;margin-top:10px}
+.progress-fill{background:var(--completed);height:100%;width:0%;transition:width .3s ease}
+.month-title{font-size:1.2rem;font-weight:bold;margin:20px 0 10px;color:var(--accent);border-bottom:1px solid #333;padding-bottom:6px}
+.item{display:flex;align-items:center;background:var(--card);padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;user-select:none;transition:background .2s,transform .1s}
+.item:active{transform:scale(.99);opacity:.85}
+.checkbox{width:23px;height:23px;border-radius:50%;border:2px solid var(--accent);margin-right:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.item.checked .checkbox{background:var(--completed);border-color:var(--completed)}
+.item.checked .checkbox::after{content:'✓';color:#000;font-size:14px;font-weight:bold}
+.item.checked .text{text-decoration:line-through;opacity:.55}
+.day{font-weight:bold;color:var(--accent);margin-right:9px;min-width:28px}
+.text{font-size:.95rem;line-height:1.35}
+.actions{display:flex;gap:8px;margin:0 0 18px}
+button{flex:1;border:0;border-radius:9px;padding:10px;background:#2a2a2a;color:var(--text);font-weight:600}
+button:active{opacity:.75}
+footer{text-align:center;color:#777;font-size:.75rem;margin-top:25px}
+</style>
+</head>
+<body>
+<h1>📖 Bible Journey 2026</h1>
+<div class="subtitle">Acompanhamento do plano de leitura bíblica</div>
+
+<div class="progress-container">
+  <div id="progress-text">Progresso: 0% (0 de 0 concluídos)</div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<div class="actions">
+  <button onclick="markAll(false)">Desmarcar tudo</button>
+  <button onclick="markAll(true)">Concluir tudo</button>
+</div>
+
+<div id="app"></div>
+<footer>Seu progresso é salvo automaticamente neste aparelho.</footer>
+
+<script>
+const plan = [{"month": "Outubro 2026", "days": [{"day": "01", "text": "Gn 1-11, Jó 1-2"}, {"day": "02", "text": "Jó 3-15"}, {"day": "03", "text": "Jó 29-41"}, {"day": "04", "text": "Jó 16-28"}, {"day": "05", "text": "Jó 42, Gn 12-23"}, {"day": "06", "text": "Gn 24-36"}, {"day": "07", "text": "Gn 37-49"}, {"day": "08", "text": "Gn 50, Êx 1-12"}, {"day": "09", "text": "Êx 13-25"}, {"day": "10", "text": "Êx 26-38"}, {"day": "11", "text": "Êx 39-40, Lv 1-11"}, {"day": "12", "text": "Lv 12-24"}, {"day": "13", "text": "Lv 25-27, Nm 1-10"}, {"day": "14", "text": "Nm 11-23"}, {"day": "15", "text": "Nm 24-36"}, {"day": "16", "text": "Dt 1-13"}, {"day": "17", "text": "Dt 14-26"}, {"day": "18", "text": "Dt 27-34, Sl 90, Js 1-4"}, {"day": "19", "text": "Js 5-17"}, {"day": "20", "text": "Js 18-24, Jz 1-6"}, {"day": "21", "text": "Jz 7-19"}, {"day": "22", "text": "Jz 20-21, Rt 1-4, 1Sm 1-7"}, {"day": "23", "text": "1Sm 8-20"}, {"day": "24", "text": "Sl 11, Sl 59, 1Sm 21-24, Sl 91, Sl 7, Sl 27, Sl 31, Sl 34, Sl 52, Sl 56"}, {"day": "25", "text": "Sl 120, Sl 140-142, 1Sm 25-27, Sl 17, Sl 35, Sl 54, Sl 63, 1Sm 28-29"}, {"day": "26", "text": "1Sm 30-31, Sl 18, Sl 121, Sl 123-125, Sl 128-130, 2Sm 1-3"}, {"day": "27", "text": "2Sm 4, Sl 6, Sl 8-10, Sl 14, Sl 16, Sl 19, Sl 21, 1Cr 1-2, Sl 43-44"}, {"day": "28", "text": "Sl 45, Sl 49, Sl 84-85, Sl 87, 1Cr 3-5, Sl 73, Sl 77-78, 1Cr 6, Sl 81"}, {"day": "29", "text": "Sl 88, Sl 92-93, 1Cr 7-10, Sl 102-104, 2Sm 5, 1Cr 11-12"}, {"day": "30", "text": "Sl 133, Sl 106-107, 1Cr 13-16, Sl 1-2, Sl 15, Sl 22-24"}, {"day": "31", "text": "Sl 47, Sl 68, Sl 89, Sl 96, Sl 100-101, Sl 105, Sl 132, 2Sm 6-7, 1Cr 17, Sl 25, Sl 29"}]}, {"month": "Novembro 2026", "days": [{"day": "01", "text": "Sl 33, Sl 36, Sl 39, 2Sm 8-9, 1Cr 18, Sl 50, Sl 53, Sl 60, Sl 75, 2Sm 10, 1Cr 19, Sl 20"}, {"day": "02", "text": "Sl 65-67, Sl 69-70, 2Sm 11-12, 1Cr 20, Sl 32, Sl 51, Sl 86, Sl 122, 2Sm 13"}, {"day": "03", "text": "2Sm 14-15, Sl 3-4, Sl 12-13, Sl 28, Sl 55, 2Sm 16-18, Sl 26, Sl 40"}, {"day": "04", "text": "Sl 58, Sl 61-62, Sl 64, 2Sm 19-21, Sl 5, Sl 38, Sl 41-42, 2Sm 22-23"}, {"day": "05", "text": "Sl 57, Sl 95, Sl 97-99, 2Sm 24, 1Cr 21-22, Sl 30, Sl 108-110, 1Cr 23"}, {"day": "06", "text": "1Cr 24-25, Sl 131, Sl 138-139, Sl 143-145, 1Cr 26-29, Sl 127"}, {"day": "07", "text": "Sl 111-118, 1Rs 1-2, Sl 37, Sl 71, Sl 94"}, {"day": "08", "text": "Sl 119, 1Rs 3-4, 2Cr 1, Sl 72, Ct 1-8"}, {"day": "09", "text": "Pv 1-13"}, {"day": "10", "text": "Pv 14-24, 1Rs 5-6"}, {"day": "11", "text": "2Cr 2-3, 1Rs 7, 2Cr 4, 1Rs 8, 2Cr 5-7, Sl 136, Sl 134, Sl 146-148"}, {"day": "12", "text": "Sl 149-150, 1Rs 9, 2Cr 8, Pv 25-29, Ec 1-4"}, {"day": "13", "text": "Ec 5-12, 1Rs 10-11, 2Cr 9, Pv 30-31"}, {"day": "14", "text": "1Rs 12-14, 2Cr 10-12, 1Rs 15, 2Cr 13-16, 1Rs 16, 2Cr 17"}, {"day": "15", "text": "1Rs 17-22, 2Cr 18-23, Ob 1"}, {"day": "16", "text": "Sl 82-83, 2Rs 1-11"}, {"day": "17", "text": "2Rs 12-13, 2Cr 24, 2Rs 14, 2Cr 25, Jn 1-4, 2Rs 15, 2Cr 26, Is 1-2"}, {"day": "18", "text": "Is 3-8, Am 1-7"}, {"day": "19", "text": "Am 8-9, 2Cr 27, Is 9-12, Mq 1-6"}, {"day": "20", "text": "Mq 7, 2Cr 28, 2Rs 16-17, Is 13-21"}, {"day": "21", "text": "Is 22-27, 2Rs 18, 2Cr 29-31, Sl 48, Os 1-2"}, {"day": "22", "text": "Os 3-14, Is 28"}, {"day": "23", "text": "Is 29-39, Sl 76, Is 40"}, {"day": "24", "text": "Is 41-48, 2Rs 19, Sl 46, Sl 80, Sl 135, Is 49"}, {"day": "25", "text": "Is 50-62"}, {"day": "26", "text": "Is 63-66, 2Rs 20-21, 2Cr 32-33, Na 1-3, 2Rs 22-23"}, {"day": "27", "text": "2Cr 34-35, Sf 1-3, Jr 1-8"}, {"day": "28", "text": "Jr 9-21"}, {"day": "29", "text": "Jr 22-34"}, {"day": "30", "text": "Jr 35-40, Sl 74, Sl 79, 2Rs 24-25, 2Cr 36, Hc 1-2"}]}, {"month": "Dezembro 2026", "days": [{"day": "01", "text": "Hc 3, Jr 41-52"}, {"day": "02", "text": "Lm 1-5, Ez 1-8"}, {"day": "03", "text": "Ez 9-21"}, {"day": "04", "text": "Ez 22-34"}, {"day": "05", "text": "Ez 35-47"}, {"day": "06", "text": "Ez 48, Jl 1-3, Dn 1-9"}, {"day": "07", "text": "Dn 10-12, Ed 1-6, Sl 137, Ag 1-2, Zc 1"}, {"day": "08", "text": "Zc 2-14"}, {"day": "09", "text": "Et 1-10, Ed 7-9"}, {"day": "10", "text": "Ed 10, Ne 1-12"}, {"day": "11", "text": "Ne 13, Sl 126, Ml 1-4, Lc 1, Jo 1, Mt 1, Lc 2, Mt 2-3, Mc 1"}, {"day": "12", "text": "Lc 3, Mt 4, Lc 4-5, Jo 2-4, Mt 8, Mc 2, Jo 5, Mt 12, Mc 3, Lc 6"}, {"day": "13", "text": "Mt 5-7, Mt 9, Lc 7, Mt 11, Lc 11, Mt 13, Lc 8, Mc 4-5, Mt 10, Mt 14"}, {"day": "14", "text": "Mc 6, Lc 9, Jo 6, Mt 15, Mc 7, Mt 16, Mc 8, Mt 17, Mc 9, Mt 18, Jo 7-9"}, {"day": "15", "text": "Jo 10, Lc 10, Lc 12-17, Jo 11, Lc 18, Mt 19, Mc 10, Mt 20"}, {"day": "16", "text": "Mt 21, Lc 19, Mc 11, Jo 12, Mt 22, Mc 12, Mt 23, Lc 20-21, Mc 13, Mt 24-26"}, {"day": "17", "text": "Mc 14, Lc 22, Jo 13-17, Mt 27, Mc 15, Lc 23, Jo 18-19, Mt 28"}, {"day": "18", "text": "Mc 16, Lc 24, Jo 20-21, At 1-9"}, {"day": "19", "text": "At 10-14, Tg 1-5, At 15-16, Gl 1"}, {"day": "20", "text": "Gl 2-6, At 17, 1Ts 1-5, 2Ts 1-2"}, {"day": "21", "text": "2Ts 3, At 18-19, 1Co 1-10"}, {"day": "22", "text": "1Co 11-16, 2Co 1-7"}, {"day": "23", "text": "2Co 8-13, Rm 1-7"}, {"day": "24", "text": "Rm 8-16, At 20-23"}, {"day": "25", "text": "At 24-28, Cl 1-4, Fm 1, Ef 1-2"}, {"day": "26", "text": "Ef 3-6, Fp 1-4, 1Tm 1-4"}, {"day": "27", "text": "1Tm 5-6, Tt 1-3, 1Pe 1-5, Hb 1-2"}, {"day": "28", "text": "Hb 3-13, 2Tm 1"}, {"day": "29", "text": "2Tm 2-4, 2Pe 1-3, Jd 1, 1Jo 1-5"}, {"day": "30", "text": "2Jo 1, 3Jo 1, Ap 1-10"}, {"day": "31", "text": "Ap 11-22"}]}];
+
+let state = JSON.parse(localStorage.getItem('bibleJourneyState') || '{}');
+
+function saveState(){
+  localStorage.setItem('bibleJourneyState', JSON.stringify(state));
+  updateProgress();
+}
+
+function toggleItem(key, element){
+  state[key] = !state[key];
+  element.classList.toggle('checked', !!state[key]);
+  saveState();
+}
+
+function markAll(value){
+  plan.forEach(m=>m.days.forEach(d=>state[`${m.month}-${d.day}`]=value));
+  saveState();
+  renderApp();
+}
+
+function updateProgress(){
+  let total=0, completed=0;
+  plan.forEach(m=>m.days.forEach(d=>{
+    total++;
+    if(state[`${m.month}-${d.day}`]) completed++;
+  }));
+  const percent=total?Math.round(completed/total*100):0;
+  document.getElementById('progress-text').innerText=`Progresso: ${percent}% (${completed} de ${total} concluídos)`;
+  document.getElementById('progress-fill').style.width=percent+'%';
+}
+
+function renderApp(){
+  const container=document.getElementById('app');
+  container.innerHTML='';
+  plan.forEach(m=>{
+    const title=document.createElement('div');
+    title.className='month-title';
+    title.innerText=m.month;
+    container.appendChild(title);
+
+    m.days.forEach(d=>{
+      const key=`${m.month}-${d.day}`;
+      const item=document.createElement('div');
+      item.className='item'+(state[key]?' checked':'');
+      item.onclick=()=>toggleItem(key,item);
+
+      const checkbox=document.createElement('div');
+      checkbox.className='checkbox';
+
+      const day=document.createElement('span');
+      day.className='day';
+      day.innerText=d.day;
+
+      const text=document.createElement('span');
+      text.className='text';
+      text.innerText=d.text;
+
+      item.append(checkbox,day,text);
+      container.appendChild(item);
+    });
+  });
+  updateProgress();
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+renderApp();
+</script>
+</body>
+</html>

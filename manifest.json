@@ -1,0 +1,11 @@
+{
+  "name": "Bible Journey 2026",
+  "short_name": "Bible Journey",
+  "description": "Acompanhamento do plano de leitura bíblica 2026.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "pt-BR",
+  "icons": []
+}
